@@ -34,15 +34,37 @@ professor_trash_wheel_df=
 To combine two datasets together:
 
 ```{r}
+mr_trash_wheel_df["trash_wheel_type"] <-"mr_trash_wheel"
+professor_trash_wheel_df["trash_wheel_type"] <-"professor_trash_wheel"
 trash_df=
-   left_join(mr_trash_wheel_df, professor_trash_wheel_df, by="dumpster" , copy=TRUE)%>%
-    mutate (trash_wheel_type= case_when(dumpster <95 ~"professor",
-                                        dumpster >95 ~"mr")
-    )%>%
-  relocate(dumpster, trash_wheel_type)
+   full_join(mr_trash_wheel_df, professor_trash_wheel_df , copy=TRUE)
 ```
 
+To find key variables
+```{r}
+round(mean(pull(trash_df, weight_tons), na.rm = TRUE))
+round(mean(pull(trash_df, volume_cubic_yards), na.rm = TRUE))
+round(mean(pull(trash_df, plastic_bottles), na.rm = TRUE))
+```
 
+After including a new variable "Trash Wheel Type", Mr. Trash Wheel has 547 observations of 15 variables (547x15) and Professor Trash Wheel has 94 observations of 14 variables (94x14). Mr. Trash Wheel and Professor Trash Wheel all have the same variables except Professor Trash Wheel does not have sport balls. After combining them together, I get 641 observations of 15 variables (641x15). 
+
+*The combined mean of weight(tons)=3
+
+*The combined mean of volume(cubic yards)=15
+
+*The combined mean of plastic bottles=1958
+
+To find total weight of trash collected by professor trash wheel and the total number of sports balls collected by mr. trash wheel in 2020
+
+```{r}
+ sum(pull(professor_trash_wheel_df, weight_tons), na.rm = TRUE)
+   filter(mr_trash_wheel_df, year==2020)
+  sum(pull(mr_trash_wheel_df, sports_balls), na.rm = TRUE)
+```
+
+Total weight of trash collected by professor trash wheel: 190.12 tons
+Total number of sports balls collected by mr. trash wheel in 2020: 6869 sports balls
 
 # Problem 3
 
