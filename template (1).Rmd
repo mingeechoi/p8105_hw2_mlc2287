@@ -47,7 +47,7 @@ round(mean(pull(trash_df, volume_cubic_yards), na.rm = TRUE))
 round(mean(pull(trash_df, plastic_bottles), na.rm = TRUE))
 ```
 
-After including a new variable "Trash Wheel Type", Mr. Trash Wheel has 547 observations of 15 variables (547x15) and Professor Trash Wheel has 94 observations of 14 variables (94x14). Mr. Trash Wheel and Professor Trash Wheel all have the same variables except Professor Trash Wheel does not have sport balls. After combining them together, I get 641 observations of 15 variables (641x15). 
+After including a new variable "Trash Wheel Type", Mr. Trash Wheel has 547 observations of 15 variables (547x15) and Professor Trash Wheel has 94 observations of 14 variables (94x14). Mr. Trash Wheel and Professor Trash Wheel have all the same variables except Professor Trash Wheel does not have the variable "sport balls". After combining them together, I get 641 observations of 15 variables (641x15). 
 
 *The combined mean of weight(tons)=3
 
@@ -59,7 +59,7 @@ To find total weight of trash collected by professor trash wheel and the total n
 
 ```{r}
  sum(pull(professor_trash_wheel_df, weight_tons), na.rm = TRUE)
-   filter(mr_trash_wheel_df, year==2020)
+   filter(mr_trash_wheel_df, year==2020, message=FALSE)
   sum(pull(mr_trash_wheel_df, sports_balls), na.rm = TRUE)
 ```
 
@@ -67,6 +67,49 @@ Total weight of trash collected by professor trash wheel: 190.12 tons
 Total number of sports balls collected by mr. trash wheel in 2020: 6869 sports balls
 
 # Problem 3
+
+Import and clean datasets
+
+```{r}
+pols_month_df=
+  read_csv("./fivethirtyeight_datasets/pols-month.csv")%>%
+  janitor::clean_names()%>%
+  separate(mon, into=c("year", "month", "day"))%>%
+  mutate(month = month.abb[as.numeric(month)])%>%
+  mutate(president = case_when(prez_gop==1 ~"gop", 
+                               prez_dem==1 ~"dem")
+  )%>%
+  select(-prez_dem,-prez_gop, -day)
+  
+#cleaning second data
+snp_df=
+   read_csv("./fivethirtyeight_datasets/snp.csv")%>%
+   separate(date, into=c("month", "day", "year"))%>% 
+   mutate(month = month.abb[as.numeric(month)])%>% 
+   select(-day)%>%
+   relocate(year, month)
+
+#cleaning third data
+unemployment_df=
+  read_csv("./fivethirtyeight_datasets/unemployment.csv")%>%
+  pivot_longer(
+    Jan:Dec,
+    names_to = "month",
+    values_to = "unemployment_percentage")
+  
+ ```                         
+                          
+                          
+                          
+                          
+                          
+                          
+                          
+                          
+ 
+  
+
+
 
 
 

@@ -66,9 +66,9 @@ round(mean(pull(trash_df, plastic_bottles), na.rm = TRUE))
 After including a new variable “Trash Wheel Type”, Mr. Trash Wheel has
 547 observations of 15 variables (547x15) and Professor Trash Wheel has
 94 observations of 14 variables (94x14). Mr. Trash Wheel and Professor
-Trash Wheel all have the same variables except Professor Trash Wheel
-does not have sport balls. After combining them together, I get 641
-observations of 15 variables (641x15).
+Trash Wheel have all the same variables except Professor Trash Wheel
+does not have the variable “sport balls”. After combining them together,
+I get 641 observations of 15 variables (641x15).
 
 \*The combined mean of weight(tons)=3
 
@@ -86,27 +86,15 @@ total number of sports balls collected by mr. trash wheel in 2020
     ## [1] 190.12
 
 ``` r
-   filter(mr_trash_wheel_df, year==2020)
+   filter(mr_trash_wheel_df, year==2020, message=FALSE)
 ```
 
-    ## # A tibble: 72 × 15
-    ##    dumpster month    year  date                weight_…¹ volum…² plast…³ polys…⁴
-    ##       <dbl> <chr>    <chr> <dttm>                  <dbl>   <dbl>   <dbl>   <dbl>
-    ##  1      381 January  2020  2020-01-18 00:00:00      2.75      15    3900    2100
-    ##  2      382 January  2020  2020-01-18 00:00:00      1.8       15    2900    1800
-    ##  3      383 January  2020  1900-01-20 00:00:00      2.9       15    1850    1100
-    ##  4      384 January  2020  2020-01-27 00:00:00      2.54      15    3400    2400
-    ##  5      385 January  2020  2020-01-27 00:00:00      2.18      15     980     900
-    ##  6      386 January  2020  2020-01-27 00:00:00      3.24      15     750     640
-    ##  7      387 January  2020  2020-01-27 00:00:00      3.07      15     500     440
-    ##  8      388 January  2020  2020-01-30 00:00:00      2.8       15    3200    2400
-    ##  9      389 January  2020  2020-01-30 00:00:00      2.8       15    3800    2700
-    ## 10      390 February 2020  2020-02-10 00:00:00      1.9       15    1850     980
-    ## # … with 62 more rows, 7 more variables: cigarette_butts <dbl>,
-    ## #   glass_bottles <dbl>, grocery_bags <dbl>, chip_bags <dbl>,
-    ## #   sports_balls <int>, homes_powered <dbl>, trash_wheel_type <chr>, and
-    ## #   abbreviated variable names ¹​weight_tons, ²​volume_cubic_yards,
-    ## #   ³​plastic_bottles, ⁴​polystyrene
+    ## # A tibble: 0 × 15
+    ## # … with 15 variables: dumpster <dbl>, month <chr>, year <chr>, date <dttm>,
+    ## #   weight_tons <dbl>, volume_cubic_yards <dbl>, plastic_bottles <dbl>,
+    ## #   polystyrene <dbl>, cigarette_butts <dbl>, glass_bottles <dbl>,
+    ## #   grocery_bags <dbl>, chip_bags <dbl>, sports_balls <int>,
+    ## #   homes_powered <dbl>, trash_wheel_type <chr>
 
 ``` r
   sum(pull(mr_trash_wheel_df, sports_balls), na.rm = TRUE)
@@ -119,3 +107,63 @@ Total number of sports balls collected by mr. trash wheel in 2020: 6869
 sports balls
 
 # Problem 3
+
+Import and clean datasets
+
+``` r
+pols_month_df=
+  read_csv("./fivethirtyeight_datasets/pols-month.csv")%>%
+  janitor::clean_names()%>%
+  separate(mon, into=c("year", "month", "day"))%>%
+  mutate(month = month.abb[as.numeric(month)])%>%
+  mutate(president = case_when(prez_gop==1 ~"gop", 
+                               prez_dem==1 ~"dem")
+  )%>%
+  select(-prez_dem,-prez_gop, -day)
+```
+
+    ## Rows: 822 Columns: 9
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## dbl  (8): prez_gop, gov_gop, sen_gop, rep_gop, prez_dem, gov_dem, sen_dem, r...
+    ## date (1): mon
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
+#cleaning second data
+snp_df=
+   read_csv("./fivethirtyeight_datasets/snp.csv")%>%
+   separate(date, into=c("month", "day", "year"))%>% 
+   mutate(month = month.abb[as.numeric(month)])%>% 
+   select(-day)%>%
+   relocate(year, month)
+```
+
+    ## Rows: 787 Columns: 2
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr (1): date
+    ## dbl (1): close
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
+#cleaning third data
+unemployment_df=
+  read_csv("./fivethirtyeight_datasets/unemployment.csv")%>%
+  pivot_longer(
+    Jan:Dec,
+    names_to = "month",
+    values_to = "unemployment_percentage")
+```
+
+    ## Rows: 68 Columns: 13
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## dbl (13): Year, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
