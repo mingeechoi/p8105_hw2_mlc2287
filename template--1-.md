@@ -8,11 +8,12 @@ Load Packages
 ``` r
 library(tidyverse)
 library(readxl)
+library(dplyr)
 ```
 
 # Problem 2
 
-To import Mr. Trash Wheel and Professor Trash Wheel datasets:
+To import and clean Mr. Trash Wheel and Professor Trash Wheel datasets:
 
 ``` r
 mr_trash_wheel_df=
@@ -24,9 +25,19 @@ mr_trash_wheel_df=
 professor_trash_wheel_df=
   read_excel("./data/trash.xlsx", sheet=2, range = "A2:M96")%>%
   janitor::clean_names()%>%
-  drop_na(data=., dumpster)
+  drop_na(data=., dumpster)%>%
+  mutate(year=as.character(year))
 ```
 
 To combine two datasets together:
 
-# Section 2
+``` r
+trash_df=
+   left_join(mr_trash_wheel_df, professor_trash_wheel_df, by="dumpster" , copy=TRUE)%>%
+    mutate (trash_wheel_type= case_when(dumpster <95 ~"professor",
+                                        dumpster >95 ~"mr")
+    )%>%
+  relocate(dumpster, trash_wheel_type)
+```
+
+# Problem 3
