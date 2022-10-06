@@ -63,12 +63,13 @@ round(mean(pull(trash_df, plastic_bottles), na.rm = TRUE))
 
     ## [1] 2465
 
-After including a new variable “Trash Wheel Type”, Mr. Trash Wheel has
-547 observations of 15 variables (547x15) and Professor Trash Wheel has
-94 observations of 14 variables (94x14). Mr. Trash Wheel and Professor
-Trash Wheel have all the same variables except Professor Trash Wheel
-does not have the variable “sport balls”. After combining them together,
-I get 641 observations of 15 variables (641x15).
+After including a new variable “Trash Wheel Type”, “Mr. Trash Wheel” has
+547 observations of 15 variables (547x15) and “Professor Trash Wheel”
+has 94 observations of 14 variables (94x14). “Mr. Trash Wheel” and
+“Professor Trash Wheel” have all the same variables except “Professor
+Trash Wheel” does not have the variable “sport balls”. After combining
+them together by a full join, I get 641 observations of 15 variables
+(641x15).
 
 \*The combined mean of weight(tons)=3
 
@@ -119,6 +120,7 @@ pols_month_df=
   mutate(president = case_when(prez_gop==1 ~"gop", 
                                prez_dem==1 ~"dem")
   )%>%
+  mutate(year=as.numeric(year))%>%
   select(-prez_dem,-prez_gop, -day)
 ```
 
@@ -137,8 +139,13 @@ snp_df=
    read_csv("./fivethirtyeight_datasets/snp.csv")%>%
    separate(date, into=c("month", "day", "year"))%>% 
    mutate(month = month.abb[as.numeric(month)])%>% 
-   select(-day)%>%
-   relocate(year, month)
+   mutate(yearfix = case_when(
+     year > 20 ~ 1900,
+     year < 20 ~ 2000 ))%>% 
+   mutate(year = as.numeric(year))%>%
+   mutate(year = year + yearfix)%>%
+   relocate(year, month)%>%
+   select(-day, -yearfix)
 ```
 
     ## Rows: 787 Columns: 2
@@ -157,7 +164,9 @@ unemployment_df=
   pivot_longer(
     Jan:Dec,
     names_to = "month",
-    values_to = "unemployment_percentage")
+    values_to = "unemployment_percentage")%>%
+    janitor::clean_names()%>%
+    mutate(year=as.numeric(year))
 ```
 
     ## Rows: 68 Columns: 13
@@ -167,3 +176,32 @@ unemployment_df=
     ## 
     ## ℹ Use `spec()` to retrieve the full column specification for this data.
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+Joining datasets by merging snp into pols and merging unemployment into
+the result
+
+``` r
+join1_data=
+  left_join(pols_month_df, snp_df)
+```
+
+    ## Joining, by = c("year", "month")
+
+``` r
+join2_data=
+   left_join(join1_data, unemployment_df)                     
+```
+
+    ## Joining, by = c("year", "month")
+
+The “pols_month” after cleaning up contains 822 observations of 9
+variables (822x9). It contains data from years 1947-2015 and contains
+the following variables:year, month, gov_gop, sen_gop, rep_gop, gov_dem,
+sen_dem, and rep_dem. The “snp” after cleaning up contains 787
+observations of 3 variables (787x3). It contains data from years
+1950-2015 and contains the following variables: year, month, and close.
+The “unemployment” after cleaning up contains 641 observations of 15
+variables (641x5). It contains data from years 1948-2015 and contains
+the following variables: year, month, and unemployment percentage. The
+dimension of the combined dataset is 822 observation of 11 variables
+(822x11).
